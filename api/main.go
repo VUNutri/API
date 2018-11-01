@@ -1,87 +1,33 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"log"
 	"net/http"
-	"os"
-	"time"
 
-	"github.com/gorilla/mux"
-	"github.com/rs/cors"
-	"labix.org/v2/mgo"
+	"./modules/product"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/render"
 )
 
-type Post struct {
-	Text      string    `json:"text" bson:"text"`
-	CreatedAt time.Time `json:"createdAt" bson:"created_at"`
-}
+func routes() *chi.Mux {
+	router := chi.NewRouter()
+	router.Use(
+		render.SetContentType(render.ContentTypeJSON),
+		middleware.Logger,
+		middleware.DefaultCompress,
+		middleware.RedirectSlashes,
+		middleware.Recoverer,
+	)
 
-var posts *mgo.Collection
+	router.Route("/v1", func(r chi.Router) {
+		r.Mount("/api/products", product.Routes())
+	})
+
+	return router
+}
 
 func main() {
-	// Connect to mongo
-	session, err := mgo.Dial("mongo:27017")
-	if err != nil {
-		log.Fatalln(err)
-		log.Fatalln("mongo err")
-		os.Exit(1)
-	}
-	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
-	// Get posts collection
-	posts = session.DB("app").C("posts")
+	router := routes()
 
-	// Set up routes
-	r := mux.NewRouter()
-	r.HandleFunc("/posts", createPost).
-		Methods("POST")
-	r.HandleFunc("/posts", readPosts).
-		Methods("GET")
-	http.ListenAndServe(":8080", cors.AllowAll().Handler(r))
-	log.Println("Listening on port 8080...")
-}
-
-func createPost(w http.ResponseWriter, r *http.Request) {
-	// Read body
-	data, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		responseError(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	// Read post
-	post := &Post{}
-	err = json.Unmarshal(data, post)
-	if err != nil {
-		responseError(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	post.CreatedAt = time.Now().UTC()
-	// Insert new post
-	if err := posts.Insert(post); err != nil {
-		responseError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	responseJSON(w, post)
-}
-
-func responseError(w http.ResponseWriter, message string, code int) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(map[string]string{"error": message})
-}
-
-func responseJSON(w http.ResponseWriter, data interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
-}
-
-func readPosts(w http.ResponseWriter, r *http.Request) {
-	result := []Post{}
-	if err := posts.Find(nil).Sort("-created_at").All(&result); err != nil {
-		responseError(w, err.Error(), http.StatusInternalServerError)
-	} else {
-		responseJSON(w, result)
-	}
+	http.ListenAndServe(":8080", router)
 }
