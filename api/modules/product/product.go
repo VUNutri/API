@@ -2,7 +2,6 @@ package product
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"../db"
@@ -30,8 +29,6 @@ func createProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&product)
 	db := db.InitDB()
 
-	log.Printf(product.Title)
-
 	query, err := db.Prepare("INSERT INTO products(title, calories, carbs, proteins) VALUES(?,?,?,?)")
 	if err != nil {
 		http.Error(w, "Can not create product", 400)
@@ -45,7 +42,7 @@ func createProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render.JSON(w, r, "Post was created")
+	render.JSON(w, r, "Product was created")
 }
 
 func getAllProducts(w http.ResponseWriter, r *http.Request) {
@@ -53,13 +50,18 @@ func getAllProducts(w http.ResponseWriter, r *http.Request) {
 	result, err := db.Query("SELECT * FROM products")
 	if err != nil {
 		http.Error(w, err.Error(), 400)
+		return
 	}
 	defer db.Close()
 
 	products := []Product{}
 	for result.Next() {
 		var product Product
-		result.Scan(&product.ID, &product.Title, &product.Calories, &product.Carbs, &product.Proteins)
+		err := result.Scan(&product.ID, &product.Title, &product.Calories, &product.Carbs, &product.Proteins)
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
 		products = append(products, product)
 	}
 	render.JSON(w, r, products)
