@@ -37,15 +37,15 @@ Url is: `<host>/v1/api/recipes/create`
 ```
 {
   "title": string,
-  "category": string,
+  "category": int,
   "time": int,
   "image": string,
   "instructions": string,
   "products": [
     {
       "id": int,
-      "value: int,
+      "value": int
     }
-  ],
+  ]
 }
 ```
