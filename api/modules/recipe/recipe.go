@@ -9,17 +9,32 @@ import (
 	"github.com/go-chi/render"
 )
 
+type Product struct {
+	ID    int `json:"id"`
+	Value int `json:"value"`
+}
+
 type Recipe struct {
-	ID       int
-	Title    string `json:"title"`
-	Category string `json:"category"`
-	Time     int    `json:"time"`
-	Image    string `json:"image"`
+	ID           int
+	Title        string    `json:"title"`
+	Category     string    `json:"category"`
+	Time         int       `json:"time"`
+	Image        string    `json:"image"`
+	Instructions string    `json:"instructions"`
+	Products     []Product `json:"products"`
+}
+
+type Ingredients struct {
+	ID        int
+	RecipeID  int `json:"recipeId`
+	ProductID int `json:"productID`
+	Value     int `json:"value"`
 }
 
 func Routes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Post("/create", createRecipe)
+	return router
 }
 
 func createRecipe(w http.ResponseWriter, r *http.Request) {
@@ -27,17 +42,31 @@ func createRecipe(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&recipe)
 	db := db.InitDB()
 
-	query, err := db.Prepare("INSERT INTO recipes(title, category, time, image) VALUES(?,?,?,?)")
+	query, err := db.Prepare("INSERT INTO recipes(title, category, time, image, instructions) VALUES(?,?,?,?)")
 	if err != nil {
 		http.Error(w, "Can not create recipe", 400)
 		return
 	}
 
-	_, er := query.Exec(recipe.Title, recipe.Category, recipe.Time, recipe.Image)
-	defer db.Close()
+	res, er := query.Exec(recipe.Title, recipe.Category, recipe.Time, recipe.Image, recipe.Instructions)
 	if er != nil {
 		http.Error(w, "Can not create recipe", 400)
 		return
+	}
+
+	recipeID, err := res.LastInsertId()
+	if err != nil {
+		http.Error(w, "Can not create recipe", 400)
+		return
+	}
+
+	for _, product := range recipe.Products {
+		query, err = db.Prepare("INSERT INTO ingredients(recipeid, productid, value) VALUES(?,?,?)")
+		_, er = query.Exec(recipeID, product.ID, product.Value)
+		if er != nil {
+			http.Error(w, "Can not create recipe", 400)
+			return
+		}
 	}
 
 	render.JSON(w, r, "Recipe was created")

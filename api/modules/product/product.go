@@ -10,7 +10,7 @@ import (
 )
 
 type Product struct {
-	ID       int
+	ID       int    `json:"id"`
 	Title    string `json:"title"`
 	Calories int    `json:"calories"`
 	Carbs    int    `json:"carbs"`
