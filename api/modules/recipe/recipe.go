@@ -17,7 +17,7 @@ type Product struct {
 type Recipe struct {
 	ID           int
 	Title        string    `json:"title"`
-	Category     string    `json:"category"`
+	Category     int       `json:"category"`
 	Time         int       `json:"time"`
 	Image        string    `json:"image"`
 	Instructions string    `json:"instructions"`
@@ -26,8 +26,8 @@ type Recipe struct {
 
 type Ingredients struct {
 	ID        int
-	RecipeID  int `json:"recipeId`
-	ProductID int `json:"productID`
+	RecipeID  int `json:"recipeId"`
+	ProductID int `json:"productId"`
 	Value     int `json:"value"`
 }
 
@@ -42,9 +42,9 @@ func createRecipe(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&recipe)
 	db := db.InitDB()
 
-	query, err := db.Prepare("INSERT INTO recipes(title, category, time, image, instructions) VALUES(?,?,?,?)")
+	query, err := db.Prepare("INSERT INTO recipes(title, category, time, image, instructions) VALUES(?,?,?,?,?)")
 	if err != nil {
-		http.Error(w, "Can not create recipe", 400)
+		http.Error(w, err.Error(), 400)
 		return
 	}
 

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"./modules/product"
+	"./modules/recipe"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
@@ -21,6 +22,7 @@ func routes() *chi.Mux {
 
 	router.Route("/v1", func(r chi.Router) {
 		r.Mount("/api/products", product.Routes())
+		r.Mount("/api/recipes", recipe.Routes())
 	})
 
 	return router
