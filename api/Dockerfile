@@ -1,12 +1,14 @@
 FROM golang:1.8
 
+ENV GOPATH /go
+
+FROM golang:1.8
 COPY ./api /go/src/api
+COPY ./api/main.go /go/src/app/main.go
 
 WORKDIR /go/src/app
-COPY ./api/main.go .
 
-RUN go get github.com/pilu/fresh
-RUN go-wrapper download
-RUN go-wrapper install
+RUN go get -d -v ./...
+RUN go install -v ./...
 
 CMD [ "app" ]
