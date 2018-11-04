@@ -16,7 +16,7 @@ services:
     image: 'mysql:latest'
     container_name: 'mysql'
     restart: always
-    enviroment:
+    environment:
       MYSQL_USER: test
       MYSQL_PASSWORD: test
       MYSQL_ROOT_PASSWORD: test
