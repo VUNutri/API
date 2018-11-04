@@ -49,3 +49,25 @@ Url is: `<host>/v1/api/recipes/create`
   ]
 }
 ```
+**Fetching all recipes**
+Url is: `<host>/v1/api/recipes/getAll`
+. JSON object:
+```
+{
+  "id": int,
+  "title": string,
+  "category": int,
+  "time": int,
+  "image": string,
+  "instructions": string,
+  "products": [
+    {
+      "title": string,
+      "value": int,
+      "calories": int,
+      "carbs": int,
+      "proteins": int
+    }
+  ]
+}
+```

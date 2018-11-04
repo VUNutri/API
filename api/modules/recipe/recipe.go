@@ -2,6 +2,7 @@ package recipe
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"../db"
@@ -10,17 +11,22 @@ import (
 )
 
 type Product struct {
-	ID    int `json:"id"`
-	Value int `json:"value"`
+	ID       int    `json:"id"`
+	Title    string `json:"title"`
+	Value    int    `json:"value"`
+	Calories int    `json:"calories"`
+	Carbs    int    `json:"carbs"`
+	Proteins int    `json:"proteins"`
 }
 
 type Recipe struct {
-	ID           int
-	Title        string    `json:"title"`
-	Category     int       `json:"category"`
-	Time         int       `json:"time"`
-	Image        string    `json:"image"`
-	Instructions string    `json:"instructions"`
+	ID           int    `json:"id"`
+	Title        string `json:"title"`
+	Category     int    `json:"category"`
+	Time         int    `json:"time"`
+	Image        string `json:"image"`
+	Instructions string `json:"instructions"`
+	Calories     int
 	Products     []Product `json:"products"`
 }
 
@@ -34,6 +40,7 @@ type Ingredients struct {
 func Routes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Post("/create", createRecipe)
+	router.Get("/getAll", getAllRecipes)
 	return router
 }
 
@@ -68,6 +75,7 @@ func createRecipe(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	defer db.Close()
 
 	render.JSON(w, r, "Recipe was created")
 }
@@ -79,17 +87,34 @@ func getAllRecipes(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	defer db.Close()
 
 	recipes := []Recipe{}
 	for result.Next() {
 		var recipe Recipe
-		err := result.Scan(&recipe.ID, &recipe.Title, &recipe.Category, &recipe.Time, &recipe.Image)
+		err := result.Scan(&recipe.ID, &recipe.Title, &recipe.Category, &recipe.Time, &recipe.Image, &recipe.Instructions)
 		if err != nil {
 			http.Error(w, err.Error(), 400)
 			return
 		}
 		recipes = append(recipes, recipe)
+	}
+
+	for idx, recipe := range recipes {
+		result, er := db.Query("SELECT products.title, ingredients.value, products.calories, products.proteins, products.carbs FROM ingredients LEFT JOIN products ON ingredients.productId = products.id WHERE ingredients.recipeId = ?", recipe.ID)
+		if er != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		for result.Next() {
+			var product Product
+			err := result.Scan(&product.Title, &product.Value, &product.Calories, &product.Proteins, &product.Carbs)
+			if err != nil {
+				http.Error(w, err.Error(), 400)
+				return
+			}
+			recipes[idx].Products = append(recipes[idx].Products, product)
+			log.Print(recipes[idx].Products)
+		}
 	}
 	render.JSON(w, r, recipes)
 }
