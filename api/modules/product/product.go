@@ -31,14 +31,14 @@ func createProduct(w http.ResponseWriter, r *http.Request) {
 
 	query, err := db.Prepare("INSERT INTO products(title, calories, carbs, proteins) VALUES(?,?,?,?)")
 	if err != nil {
-		http.Error(w, "Can not create product", 400)
+		http.Error(w, err.Error(), 400)
 		return
 	}
 
 	_, er := query.Exec(product.Title, product.Calories, product.Carbs, product.Proteins)
 	defer db.Close()
 	if er != nil {
-		http.Error(w, "Can not create product", 400)
+		http.Error(w, err.Error(), 400)
 		return
 	}
 

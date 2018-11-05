@@ -20,13 +20,15 @@ type Product struct {
 }
 
 type Recipe struct {
-	ID           int    `json:"id"`
-	Title        string `json:"title"`
-	Category     int    `json:"category"`
-	Time         int    `json:"time"`
-	Image        string `json:"image"`
-	Instructions string `json:"instructions"`
-	Calories     int
+	ID           int       `json:"id"`
+	Title        string    `json:"title"`
+	Category     int       `json:"category"`
+	Time         int       `json:"time"`
+	Image        string    `json:"image"`
+	Instructions string    `json:"instructions"`
+	Calories     int       `json:"calories"`
+	Carbs        int       `json:"carbs"`
+	Proteins     int       `json:"proteins"`
 	Products     []Product `json:"products"`
 }
 
@@ -46,6 +48,7 @@ func Routes() *chi.Mux {
 
 func createRecipe(w http.ResponseWriter, r *http.Request) {
 	var recipe Recipe
+
 	json.NewDecoder(r.Body).Decode(&recipe)
 	db := db.InitDB()
 
@@ -55,25 +58,58 @@ func createRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, er := query.Exec(recipe.Title, recipe.Category, recipe.Time, recipe.Image, recipe.Instructions)
-	if er != nil {
-		http.Error(w, "Can not create recipe", 400)
+	res, err := query.Exec(recipe.Title, recipe.Category, recipe.Time, recipe.Image, recipe.Instructions)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
 		return
 	}
 
 	recipeID, err := res.LastInsertId()
 	if err != nil {
-		http.Error(w, "Can not create recipe", 400)
+		http.Error(w, err.Error(), 400)
 		return
 	}
 
 	for _, product := range recipe.Products {
-		query, err = db.Prepare("INSERT INTO ingredients(recipeid, productid, value) VALUES(?,?,?)")
-		_, er = query.Exec(recipeID, product.ID, product.Value)
-		if er != nil {
-			http.Error(w, "Can not create recipe", 400)
+		query, err := db.Prepare("INSERT INTO ingredients(recipeid, productid, value) VALUES(?,?,?)")
+		if err != nil {
+			http.Error(w, err.Error(), 400)
 			return
 		}
+		_, er := query.Exec(recipeID, product.ID, product.Value)
+		if er != nil {
+			http.Error(w, er.Error(), 400)
+			return
+		}
+	}
+
+	result, er := db.Query("SELECT products.title, ingredients.value, products.calories, products.proteins, products.carbs FROM ingredients LEFT JOIN products ON ingredients.productId = products.id WHERE ingredients.recipeId = ?", recipeID)
+	if er != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	for result.Next() {
+		var product Product
+		err := result.Scan(&product.Title, &product.Value, &product.Calories, &product.Proteins, &product.Carbs)
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		recipe.Calories += product.Calories
+		recipe.Carbs += product.Carbs
+		recipe.Proteins += product.Proteins
+	}
+
+	queryB, err := db.Prepare("UPDATE recipes SET calories = ?, carbs = ?, proteins = ? WHERE id = ?")
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+
+	res, err = queryB.Exec(recipe.Calories, recipe.Carbs, recipe.Proteins, recipeID)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
 	}
 	defer db.Close()
 
@@ -91,7 +127,7 @@ func getAllRecipes(w http.ResponseWriter, r *http.Request) {
 	recipes := []Recipe{}
 	for result.Next() {
 		var recipe Recipe
-		err := result.Scan(&recipe.ID, &recipe.Title, &recipe.Category, &recipe.Time, &recipe.Image, &recipe.Instructions)
+		err := result.Scan(&recipe.ID, &recipe.Title, &recipe.Category, &recipe.Time, &recipe.Image, &recipe.Instructions, &recipe.Calories, &recipe.Carbs, &recipe.Proteins)
 		if err != nil {
 			http.Error(w, err.Error(), 400)
 			return

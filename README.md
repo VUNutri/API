@@ -60,6 +60,9 @@ Url is: `<host>/v1/api/recipes/getAll`
   "time": int,
   "image": string,
   "instructions": string,
+  "calories": int,
+  "carbs": int,
+  "proteins": int
   "products": [
     {
       "title": string,
