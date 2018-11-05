@@ -65,6 +65,7 @@ Url is: `<host>/v1/api/recipes/getAll`
   "proteins": int
   "products": [
     {
+      "id": int,
       "title": string,
       "value": int,
       "calories": int,

@@ -2,7 +2,6 @@ package recipe
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"../db"
@@ -69,49 +68,23 @@ func createRecipe(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
+	recipe.ID = int(recipeID)
 
-	for _, product := range recipe.Products {
-		query, err := db.Prepare("INSERT INTO ingredients(recipeid, productid, value) VALUES(?,?,?)")
-		if err != nil {
-			http.Error(w, err.Error(), 400)
-			return
-		}
-		_, er := query.Exec(recipeID, product.ID, product.Value)
-		if er != nil {
-			http.Error(w, er.Error(), 400)
-			return
-		}
-	}
-
-	result, er := db.Query("SELECT products.title, ingredients.value, products.calories, products.proteins, products.carbs FROM ingredients LEFT JOIN products ON ingredients.productId = products.id WHERE ingredients.recipeId = ?", recipeID)
-	if er != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-	for result.Next() {
-		var product Product
-		err := result.Scan(&product.Title, &product.Value, &product.Calories, &product.Proteins, &product.Carbs)
-		if err != nil {
-			http.Error(w, err.Error(), 400)
-			return
-		}
-		recipe.Calories += product.Calories
-		recipe.Carbs += product.Carbs
-		recipe.Proteins += product.Proteins
-	}
-
-	queryB, err := db.Prepare("UPDATE recipes SET calories = ?, carbs = ?, proteins = ? WHERE id = ?")
+	err = createRecipeIngredients(&recipe)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-
-	res, err = queryB.Exec(recipe.Calories, recipe.Carbs, recipe.Proteins, recipeID)
+	err = sumRecipeNutrition(&recipe)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	defer db.Close()
+	err = updateRecipeNutrition(&recipe)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
 
 	render.JSON(w, r, "Recipe was created")
 }
@@ -136,21 +109,65 @@ func getAllRecipes(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for idx, recipe := range recipes {
-		result, er := db.Query("SELECT products.title, ingredients.value, products.calories, products.proteins, products.carbs FROM ingredients LEFT JOIN products ON ingredients.productId = products.id WHERE ingredients.recipeId = ?", recipe.ID)
+		result, er := db.Query("SELECT products.id, products.title, ingredients.value, products.calories, products.proteins, products.carbs FROM ingredients LEFT JOIN products ON ingredients.productId = products.id WHERE ingredients.recipeId = ?", recipe.ID)
 		if er != nil {
 			http.Error(w, err.Error(), 400)
 			return
 		}
 		for result.Next() {
 			var product Product
-			err := result.Scan(&product.Title, &product.Value, &product.Calories, &product.Proteins, &product.Carbs)
+			err := result.Scan(&product.ID, &product.Title, &product.Value, &product.Calories, &product.Proteins, &product.Carbs)
 			if err != nil {
 				http.Error(w, err.Error(), 400)
 				return
 			}
 			recipes[idx].Products = append(recipes[idx].Products, product)
-			log.Print(recipes[idx].Products)
 		}
 	}
 	render.JSON(w, r, recipes)
+}
+
+func updateRecipeNutrition(recipe *Recipe) (err error) {
+	db := db.InitDB()
+	query, err := db.Prepare("UPDATE recipes SET calories = ?, carbs = ?, proteins = ? WHERE id = ?")
+	if err == nil {
+		_, err = query.Exec(recipe.Calories, recipe.Carbs, recipe.Proteins, recipe.ID)
+	}
+	defer db.Close()
+	return err
+}
+
+func sumRecipeNutrition(recipe *Recipe) (err error) {
+	db := db.InitDB()
+	result, err := db.Query("SELECT products.title, ingredients.value, products.calories, products.proteins, products.carbs FROM ingredients LEFT JOIN products ON ingredients.productId = products.id WHERE ingredients.recipeId = ?", recipe.ID)
+	defer db.Close()
+	if err == nil {
+		for result.Next() {
+			var product Product
+			err := result.Scan(&product.Title, &product.Value, &product.Calories, &product.Proteins, &product.Carbs)
+			if err != nil {
+				return err
+			}
+			recipe.Calories += product.Calories
+			recipe.Carbs += product.Carbs
+			recipe.Proteins += product.Proteins
+		}
+	}
+	return err
+}
+
+func createRecipeIngredients(recipe *Recipe) (err error) {
+	db := db.InitDB()
+	for _, product := range recipe.Products {
+		query, err := db.Prepare("INSERT INTO ingredients(recipeid, productid, value) VALUES(?,?,?)")
+		if err == nil {
+			_, er := query.Exec(recipe.ID, product.ID, product.Value)
+			defer db.Close()
+			if er != nil {
+				return err
+			}
+		}
+	}
+	defer db.Close()
+	return err
 }
