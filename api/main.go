@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"./modules/product"
@@ -31,5 +32,8 @@ func routes() *chi.Mux {
 func main() {
 	router := routes()
 
-	http.ListenAndServe(":8080", router)
+	err := http.ListenAndServe(":8080", router)
+	if err != nil {
+		log.Println(err)
+	}
 }

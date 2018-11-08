@@ -75,3 +75,30 @@ Url is: `<host>/v1/api/recipes/getAll`
   ]
 }
 ```
+**Fetching recipe by id**
+Url is: `<host>/v1/api/recipes/getById/{id}`
+. JSON object:
+```
+{
+  "id": int,
+  "title": string,
+  "category": int,
+  "time": int,
+  "image": string,
+  "instructions": string,
+  "calories": int,
+  "carbs": int,
+  "proteins": int
+  "products": [
+    {
+      "id": int,
+      "title": string,
+      "value": int,
+      "calories": int,
+      "carbs": int,
+      "proteins": int
+    }
+  ]
+}
+```
+

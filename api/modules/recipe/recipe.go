@@ -42,6 +42,7 @@ func Routes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Post("/create", createRecipe)
 	router.Get("/getAll", getAllRecipes)
+	router.Get("/getById/{recipeId}", getRecipeById)
 	return router
 }
 
@@ -125,6 +126,42 @@ func getAllRecipes(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	render.JSON(w, r, recipes)
+}
+
+func getRecipeById(w http.ResponseWriter, r *http.Request) {
+	recipeID := chi.URLParam(r, "recipeId")
+
+	db := db.InitDB()
+	result, err := db.Query("SELECT * FROM recipes WHERE id = ?", recipeID)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+
+	recipe := Recipe{}
+	for result.Next() {
+		err = result.Scan(&recipe.ID, &recipe.Title, &recipe.Category, &recipe.Time, &recipe.Image, &recipe.Instructions, &recipe.Calories, &recipe.Carbs, &recipe.Proteins)
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+	}
+
+	result, err = db.Query("SELECT products.id, products.title, ingredients.value, products.calories, products.proteins, products.carbs FROM ingredients LEFT JOIN products ON ingredients.productId = products.id WHERE ingredients.recipeId = ?", recipe.ID)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	for result.Next() {
+		var product Product
+		err := result.Scan(&product.ID, &product.Title, &product.Value, &product.Calories, &product.Proteins, &product.Carbs)
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		recipe.Products = append(recipe.Products, product)
+	}
+	render.JSON(w, r, recipe)
 }
 
 func updateRecipeNutrition(recipe *Recipe) (err error) {
