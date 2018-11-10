@@ -8,7 +8,7 @@ ___
 
 **Product creation**
 POST request url: `<host>/v1/api/products/create`
-. JSON object:
+JSON Response:
 ```
 {
   "title": string,
@@ -19,7 +19,7 @@ POST request url: `<host>/v1/api/products/create`
 ```
 **Fetching all products**
 GET request url: `<host>/v1/api/products/getAll`
-. JSON object:
+JSON Response:
 ```
 [
   {
@@ -33,7 +33,7 @@ GET request url: `<host>/v1/api/products/getAll`
 ```
 **Fetching product by id**
 GET request url: `<host>/v1/api/products/getById/{id}`
-. JSON object:
+JSON Response:
 ```
 {
   "id": int,
@@ -47,7 +47,7 @@ GET request url: `<host>/v1/api/products/getById/{id}`
 ### Recipe
 **Recipe creation**
 POST request url: `<host>/v1/api/recipes/create`
-. JSON object:
+JSON Response:
 ```
 {
   "title": string,
@@ -65,7 +65,7 @@ POST request url: `<host>/v1/api/recipes/create`
 ```
 **Fetching all recipes**
 GET request url: `<host>/v1/api/recipes/getAll`
-. JSON object:
+JSON Response:
 ```
 [{
   "id": int,
@@ -91,7 +91,7 @@ GET request url: `<host>/v1/api/recipes/getAll`
 ```
 **Fetching recipe by id**
 GET request url: `<host>/v1/api/recipes/getById/{id}`
-. JSON object:
+JSON Response:
 ```
 {
   "id": int,
@@ -117,7 +117,7 @@ GET request url: `<host>/v1/api/recipes/getById/{id}`
 ```
 **Fetching menu**
 GET request url: `<host>/v1/api/recipes/getMenu/{daysCount}/{mealsCount}/{caloriesCount}`
-. JSON object:
+JSON Response:
 ```
 [
   {
@@ -134,12 +134,12 @@ GET request url: `<host>/v1/api/recipes/getMenu/{daysCount}/{mealsCount}/{calori
       "proteins": int
       "products": [
         {
-         "id": int,
-         "title": string,
-         "value": int,
-         "calories": int,
-         "carbs": int,
-         "proteins": int
+          "id": int,
+          "title": string,
+          "value": int,
+          "calories": int,
+          "carbs": int,
+          "proteins": int
         }
       ]
     ]
