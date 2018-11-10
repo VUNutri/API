@@ -1,7 +1,7 @@
 # Nutri APP API
 
 ### Introduction
-This api is based on REST architecture. The whole communication process is being made with HTTP json request and responses.
+This api is based on REST architecture. The whole communication process is being made with HTTP JSON request and responses.
 ___
 
 ### Product
@@ -67,27 +67,29 @@ JSON Response:
 GET request url: `<host>/v1/api/recipes/getAll`
 JSON Response:
 ```
-[{
-  "id": int,
-  "title": string,
-  "category": int,
-  "time": int,
-  "image": string,
-  "instructions": string,
-  "calories": int,
-  "carbs": int,
-  "proteins": int
-  "products": [
-    {
-      "id": int,
-      "title": string,
-      "value": int,
-      "calories": int,
-      "carbs": int,
-      "proteins": int
-    }
-  ]
-}]
+[
+  {
+    "id": int,
+    "title": string,
+    "category": int,
+    "time": int,
+    "image": string,
+    "instructions": string,
+    "calories": int,
+    "carbs": int,
+    "proteins": int
+    "products": [
+      {
+        "id": int,
+        "title": string,
+        "value": int,
+        "calories": int,
+        "carbs": int,
+        "proteins": int
+      }
+    ]
+  }
+]
 ```
 **Fetching recipe by id**
 GET request url: `<host>/v1/api/recipes/getById/{id}`

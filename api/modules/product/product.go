@@ -1,10 +1,10 @@
 package product
 
 import (
+	"app/modules/db"
 	"encoding/json"
 	"net/http"
 
-	"../db"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 )

@@ -1,12 +1,12 @@
 package recipe
 
 import (
+	"app/modules/db"
 	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
 
-	"../db"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 )

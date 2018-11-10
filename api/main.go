@@ -1,11 +1,11 @@
 package main
 
 import (
+	"app/modules/product"
+	"app/modules/recipe"
 	"log"
 	"net/http"
 
-	"./modules/product"
-	"./modules/recipe"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
