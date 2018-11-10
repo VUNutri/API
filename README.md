@@ -7,7 +7,7 @@ ___
 ### Product
 
 **Product creation**
-Url is: `<host>/v1/api/products/create`
+POST request url: `<host>/v1/api/products/create`
 . JSON object:
 ```
 {
@@ -18,11 +18,25 @@ Url is: `<host>/v1/api/products/create`
 }
 ```
 **Fetching all products**
-Url is: `<host>/v1/api/products/getAll`
+GET request url: `<host>/v1/api/products/getAll`
+. JSON object:
+```
+[
+  {
+    "id: int,
+    "title": string,
+    "calories": int,
+    "carbs": int,
+    "proteins": int
+  }
+]
+```
+**Fetching product by id**
+GET request url: `<host>/v1/api/products/getById/{id}`
 . JSON object:
 ```
 {
-  "id: int,
+  "id": int,
   "title": string,
   "calories": int,
   "carbs": int,
@@ -32,7 +46,7 @@ Url is: `<host>/v1/api/products/getAll`
 
 ### Recipe
 **Recipe creation**
-Url is: `<host>/v1/api/recipes/create`
+POST request url: `<host>/v1/api/recipes/create`
 . JSON object:
 ```
 {
@@ -50,10 +64,10 @@ Url is: `<host>/v1/api/recipes/create`
 }
 ```
 **Fetching all recipes**
-Url is: `<host>/v1/api/recipes/getAll`
+GET request url: `<host>/v1/api/recipes/getAll`
 . JSON object:
 ```
-{
+[{
   "id": int,
   "title": string,
   "category": int,
@@ -73,10 +87,10 @@ Url is: `<host>/v1/api/recipes/getAll`
       "proteins": int
     }
   ]
-}
+}]
 ```
 **Fetching recipe by id**
-Url is: `<host>/v1/api/recipes/getById/{id}`
+GET request url: `<host>/v1/api/recipes/getById/{id}`
 . JSON object:
 ```
 {
@@ -100,5 +114,36 @@ Url is: `<host>/v1/api/recipes/getById/{id}`
     }
   ]
 }
+```
+**Fetching menu**
+GET request url: `<host>/v1/api/recipes/getMenu/{daysCount}/{mealsCount}/{caloriesCount}`
+. JSON object:
+```
+[
+  {
+    "dayCount": int,
+    "meals": [
+      "id": int,
+      "title": string,
+      "category": int,
+      "time": int,
+      "image": string,
+      "instructions": string,
+      "calories": int,
+      "carbs": int,
+      "proteins": int
+      "products": [
+        {
+         "id": int,
+         "title": string,
+         "value": int,
+         "calories": int,
+         "carbs": int,
+         "proteins": int
+        }
+      ]
+    ]
+  }
+]
 ```
 

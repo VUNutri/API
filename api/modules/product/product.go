@@ -21,6 +21,7 @@ func Routes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Post("/create", createProduct)
 	router.Get("/getAll", getAllProducts)
+	router.Get("/getById/{productId}", getProductByID)
 	return router
 }
 
@@ -65,4 +66,25 @@ func getAllProducts(w http.ResponseWriter, r *http.Request) {
 		products = append(products, product)
 	}
 	render.JSON(w, r, products)
+}
+
+func getProductByID(w http.ResponseWriter, r *http.Request) {
+	productID := chi.URLParam(r, "productId")
+	db := db.InitDB()
+	result, err := db.Query("SELECT * FROM products WHERE id = ?", productID)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	defer db.Close()
+
+	product := Product{}
+	for result.Next() {
+		err := result.Scan(&product.ID, &product.Title, &product.Calories, &product.Carbs, &product.Proteins)
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+	}
+	render.JSON(w, r, product)
 }
