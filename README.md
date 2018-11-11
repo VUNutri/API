@@ -8,7 +8,7 @@ ___
 
 **Product creation**
 POST request url: `<host>/v1/api/products/create`
-JSON Response:
+JSON Response: 
 ```
 {
   "title": string,
