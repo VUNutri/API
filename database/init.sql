@@ -1,3 +1,5 @@
+USE nutri;
+
 DROP TABLE IF EXISTS products;
 Create TABLE products (
   id int(6) unsigned NOT NULL AUTO_INCREMENT,
@@ -6,7 +8,7 @@ Create TABLE products (
   carbs int (6) NOT NULL ,
   proteins int(6) NOT NULL,
   primary key (id)
-)
+);
 
 DROP TABLE IF EXISTS recipes;
 CREATE TABLE recipes (
@@ -20,7 +22,7 @@ CREATE TABLE recipes (
   carbs int (6) NOT NULL ,
   proteins int(6) NOT NULL,
   primary key (id)
-)
+);
 
 DROP TABLE IF EXISTS ingredients;
 CREATE TABLE ingredients (
@@ -33,4 +35,4 @@ CREATE TABLE ingredients (
   primary key (id),
   foreign key (recipeId) references recipes(id),
   foreign key (productId) references products(id)
-)
+);
