@@ -1,8 +1,8 @@
 # Nutri APP API
 
 ### Introduction
-This api is based on REST architecture. The whole communication process is being made with HTTP JSON request and responses.
-___
+This api is based on REST architecture. The whole communication process is being made with HTTP JSON request and responses. 
+ ___
 
 ### Product
 
