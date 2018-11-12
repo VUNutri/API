@@ -22,6 +22,7 @@ func InitDB() *sql.DB {
 	db, err := sql.Open("mysql", connection)
 
 	if err != nil {
+		log.Printf(connection)
 		panic(err.Error())
 	}
 	return db
