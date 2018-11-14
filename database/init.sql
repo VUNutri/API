@@ -18,9 +18,9 @@ CREATE TABLE recipes (
   time int(15) NOT NULL,
   image varchar(50) NOT NULL,
   instructions text NOT NULL,
-  calories int(6) NOT NULL,
-  carbs int (6) NOT NULL ,
-  proteins int(6) NOT NULL,
+  calories int(6) DEFAULT 0,
+  carbs int (6) DEFAULT 0 ,
+  proteins int(6) DEFAULT 0,
   primary key (id)
 );
 
