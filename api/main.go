@@ -1,6 +1,7 @@
 package main
 
 import (
+	"app/modules/menu"
 	"app/modules/product"
 	"app/modules/recipe"
 	"log"
@@ -24,6 +25,7 @@ func routes() *chi.Mux {
 	router.Route("/v1", func(r chi.Router) {
 		r.Mount("/api/products", product.Routes())
 		r.Mount("/api/recipes", recipe.Routes())
+		r.Mount("/api/menu", menu.Routes())
 	})
 
 	return router

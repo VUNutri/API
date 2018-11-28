@@ -137,6 +137,7 @@ func getAllRecipes(w http.ResponseWriter, r *http.Request) {
 }
 
 func getMenu(w http.ResponseWriter, r *http.Request) {
+	log.Println("helo")
 	daysCount, err := strconv.Atoi(chi.URLParam(r, "daysCount"))
 	mealsCount, err := strconv.Atoi(chi.URLParam(r, "mealsCount"))
 	caloriesCount, err := strconv.Atoi(chi.URLParam(r, "caloriesCount"))
