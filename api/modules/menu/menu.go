@@ -62,15 +62,13 @@ func getMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	breakfast, err := getRecipes(0)
+	breakfast, err := getRecipes(0, caloriesCount)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
 
-	log.Print(breakfast)
-
-	mainMeal, err := getRecipes(1)
+	mainMeal, err := getRecipes(1, caloriesCount)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
@@ -82,24 +80,24 @@ func getMenu(w http.ResponseWriter, r *http.Request) {
 		for i := 0; i < daysCount; i++ {
 			day := Day{}
 			day.Count = i + 1
-			day.Recipes = append(day.Recipes, returnRand(prepRecipes(mainMeal, caloriesCount)))
+			day.Recipes = append(day.Recipes, returnRand(mainMeal))
 			days = append(days, day)
 		}
 	} else if mealsCount == 2 {
 		for i := 0; i < daysCount; i++ {
 			day := Day{}
 			day.Count = i + 1
-			day.Recipes = append(day.Recipes, returnRand(prepRecipes(breakfast, caloriesCount)))
-			day.Recipes = append(day.Recipes, returnRand(prepRecipes(mainMeal, caloriesCount)))
+			day.Recipes = append(day.Recipes, returnRand(breakfast))
+			day.Recipes = append(day.Recipes, returnRand(mainMeal))
 			days = append(days, day)
 		}
 	}
 	render.JSON(w, r, days)
 }
 
-func getRecipes(cat int) ([]Recipe, error) {
+func getRecipes(cat int, calories int) ([]Recipe, error) {
 	db := db.InitDB()
-	result, err := db.Query("SELECT * FROM recipes WHERE category = ?", cat)
+	result, err := db.Query("SELECT * FROM recipes WHERE category = ? AND calories <= ?", cat, calories)
 	if err != nil {
 		return nil, err
 	}
@@ -142,16 +140,4 @@ func returnRand(recipes []Recipe) Recipe {
 	n := rand.Intn(len(recipes))
 	log.Println(len(recipes))
 	return recipes[n]
-}
-
-func prepRecipes(recipes []Recipe, cal int) []Recipe {
-	i := 0
-	for recipes[i].Calories <= cal {
-		log.Println(len(recipes), i)
-		i++
-		if i == len(recipes) {
-			break
-		}
-	}
-	return recipes[0:i]
 }

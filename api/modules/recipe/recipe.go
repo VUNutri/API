@@ -48,7 +48,6 @@ func Routes() *chi.Mux {
 	router.Post("/create", createRecipe)
 	router.Get("/getAll", getAllRecipes)
 	router.Get("/getById/{recipeId}", getRecipeById)
-	router.Get("/getMenu/{daysCount}/{mealsCount}/{caloriesCount}", getMenu)
 	return router
 }
 
