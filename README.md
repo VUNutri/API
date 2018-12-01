@@ -8,7 +8,7 @@ This api is based on REST architecture. The whole communication process is being
 
 **Product creation**
 POST request url: `<host>/v1/api/products/create`
-JSON Response: 
+JSON Request: 
 ```
 {
   "title": string,
@@ -19,7 +19,7 @@ JSON Response:
 ```
 **Fetching all products**
 GET request url: `<host>/v1/api/products/getAll`
-JSON Response:
+JSON Request:
 ```
 [
   {
@@ -117,8 +117,25 @@ JSON Response:
   ]
 }
 ```
+**Checking if title is valid**
+GET request url: `<host>/v1/api/recipes/checkTitle/<title>`
+JSON Response:
+```
+Title is valid/not valid
+```
+
+### Menu
 **Fetching menu**
-GET request url: `<host>/v1/api/recipes/getMenu/{daysCount}/{mealsCount}/{caloriesCount}`
+POST request url: `<host>/v1/api/menu/getMenu`
+JSON Request: 
+```
+{
+  "days": int,
+  "meals": int,
+  "calories": int,
+  "blockedIngredients": int []
+}
+```
 JSON Response:
 ```
 [

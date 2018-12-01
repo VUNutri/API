@@ -48,6 +48,7 @@ func Routes() *chi.Mux {
 	router.Post("/create", createRecipe)
 	router.Get("/getAll", getAllRecipes)
 	router.Get("/getById/{recipeId}", getRecipeById)
+	router.Get("/checkTitle/{title}", checkIfTitleValid)
 	return router
 }
 
@@ -65,19 +66,19 @@ func createRecipe(w http.ResponseWriter, r *http.Request) {
 
 	query, err := db.Prepare("INSERT INTO recipes(title, category, time, image, instructions) VALUES(?,?,?,?,?)")
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		http.Error(w, "SQL insert error", 400)
 		return
 	}
 
 	res, err := query.Exec(recipe.Title, recipe.Category, recipe.Time, recipe.Image, recipe.Instructions)
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		http.Error(w, "SQL insert error", 400)
 		return
 	}
 
 	recipeID, err := res.LastInsertId()
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		http.Error(w, "SQL insert error", 400)
 		return
 	}
 	recipe.ID = int(recipeID)
@@ -87,6 +88,7 @@ func createRecipe(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
+
 	err = sumRecipeNutrition(&recipe)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
@@ -205,13 +207,14 @@ func sumRecipeNutrition(recipe *Recipe) (err error) {
 }
 
 func createRecipeIngredients(recipe *Recipe) (err error) {
+
 	db := db.InitDB()
 	for _, product := range recipe.Products {
 		query, err := db.Prepare("INSERT INTO ingredients(recipeid, productid, value) VALUES(?,?,?)")
 		if err == nil {
-			_, er := query.Exec(recipe.ID, product.ID, product.Value)
+			_, err := query.Exec(recipe.ID, product.ID, product.Value)
 			defer db.Close()
-			if er != nil {
+			if err != nil {
 				return err
 			}
 		}
@@ -220,24 +223,44 @@ func createRecipeIngredients(recipe *Recipe) (err error) {
 	return err
 }
 
+func checkIfTitleValid(w http.ResponseWriter, r *http.Request) {
+	title := chi.URLParam(r, "title")
+	var ifExists bool
+
+	db := db.InitDB()
+	err := db.QueryRow("SELECT IF(COUNT(*),'true','false') FROM recipes WHERE title = ?", title).Scan(&ifExists)
+	defer db.Close()
+	if err != nil {
+		http.Error(w, "Bad request", 400)
+		return
+	}
+
+	if ifExists {
+		http.Error(w, "Title exists", 400)
+		return
+	}
+
+	render.JSON(w, r, "Title is valid")
+}
+
 func checkIfValid(r Recipe) bool {
 	if len(r.Title) < 4 {
 		return false
-	} 
+	}
 	if r.Category == 0 {
 		return false
-	} 
+	}
 	if r.Time == 0 {
 		return false
-	} 
+	}
 	if len(r.Image) < 4 {
 		return false
-	} 
+	}
 	if len(r.Instructions) < 10 {
 		return false
-	} 
+	}
 	if len(r.Products) < 2 {
 		return false
-	} 
+	}
 	return true
 }

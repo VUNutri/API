@@ -2,12 +2,12 @@ package menu
 
 import (
 	"app/modules/db"
+	"encoding/json"
 	"log"
 	"math/rand"
 	"net/http"
 	"sort"
 	"time"
-	"encoding/json"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -19,10 +19,10 @@ type Day struct {
 }
 
 type Menu struct {
-	Days int `json:"days"`
-	Meals int `json:"meals"`
-	Calories int `json:"calories"`
-	Block []int `json:"blockedIngredients"`
+	Days     int   `json:"days"`
+	Meals    int   `json:"meals"`
+	Calories int   `json:"calories"`
+	Block    []int `json:"blockedIngredients"`
 }
 
 type Product struct {
@@ -62,7 +62,7 @@ func Routes() *chi.Mux {
 
 func getMenu(w http.ResponseWriter, r *http.Request) {
 	var menu Menu
-	
+
 	json.NewDecoder(r.Body).Decode(&menu)
 
 	if !checkIfValid(menu) {
@@ -70,13 +70,13 @@ func getMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	breakfast, err := getRecipes(0, menu.Calories / 4)
+	breakfast, err := getRecipes(0, menu.Calories/4)
 	if err != nil {
 		http.Error(w, "Bad request", 400)
 		return
 	}
 
-	mainMeal, err := getRecipes(1, menu.Calories / 2)
+	mainMeal, err := getRecipes(1, menu.Calories/2)
 	if err != nil {
 		http.Error(w, "Bad request", 400)
 		return
