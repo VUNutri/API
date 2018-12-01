@@ -55,6 +55,12 @@ func createRecipe(w http.ResponseWriter, r *http.Request) {
 	var recipe Recipe
 
 	json.NewDecoder(r.Body).Decode(&recipe)
+
+	if !checkIfValid(recipe) {
+		http.Error(w, "Bad request", 400)
+		return
+	}
+
 	db := db.InitDB()
 
 	query, err := db.Prepare("INSERT INTO recipes(title, category, time, image, instructions) VALUES(?,?,?,?,?)")
@@ -212,4 +218,26 @@ func createRecipeIngredients(recipe *Recipe) (err error) {
 	}
 	defer db.Close()
 	return err
+}
+
+func checkIfValid(r Recipe) bool {
+	if len(r.Title) < 4 {
+		return false
+	} 
+	if r.Category == 0 {
+		return false
+	} 
+	if r.Time == 0 {
+		return false
+	} 
+	if len(r.Image) < 4 {
+		return false
+	} 
+	if len(r.Instructions) < 10 {
+		return false
+	} 
+	if len(r.Products) < 2 {
+		return false
+	} 
+	return true
 }

@@ -6,8 +6,8 @@ import (
 	"math/rand"
 	"net/http"
 	"sort"
-	"strconv"
 	"time"
+	"encoding/json"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -16,6 +16,13 @@ import (
 type Day struct {
 	Count   int      `json:"dayCount"`
 	Recipes []Recipe `json:"meals"`
+}
+
+type Menu struct {
+	Days int `json:"days"`
+	Meals int `json:"meals"`
+	Calories int `json:"calories"`
+	Block []int `json:"blockedIngredients"`
 }
 
 type Product struct {
@@ -49,42 +56,43 @@ type Ingredients struct {
 
 func Routes() *chi.Mux {
 	router := chi.NewRouter()
-	router.Get("/getMenu/{daysCount}/{mealsCount}/{caloriesCount}", getMenu)
+	router.Post("/getMenu", getMenu)
 	return router
 }
 
 func getMenu(w http.ResponseWriter, r *http.Request) {
-	daysCount, err := strconv.Atoi(chi.URLParam(r, "daysCount"))
-	mealsCount, err := strconv.Atoi(chi.URLParam(r, "mealsCount"))
-	caloriesCount, err := strconv.Atoi(chi.URLParam(r, "caloriesCount"))
-	if err != nil {
-		http.Error(w, err.Error(), 400)
+	var menu Menu
+	
+	json.NewDecoder(r.Body).Decode(&menu)
+
+	if !checkIfValid(menu) {
+		http.Error(w, "Bad request", 400)
 		return
 	}
 
-	breakfast, err := getRecipes(0, caloriesCount)
+	breakfast, err := getRecipes(0, menu.Calories / 4)
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		http.Error(w, "Bad request", 400)
 		return
 	}
 
-	mainMeal, err := getRecipes(1, caloriesCount)
+	mainMeal, err := getRecipes(1, menu.Calories / 2)
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		http.Error(w, "Bad request", 400)
 		return
 	}
 
 	days := []Day{}
 
-	if mealsCount == 1 {
-		for i := 0; i < daysCount; i++ {
+	if menu.Meals == 1 {
+		for i := 0; i < menu.Days; i++ {
 			day := Day{}
 			day.Count = i + 1
 			day.Recipes = append(day.Recipes, returnRand(mainMeal))
 			days = append(days, day)
 		}
-	} else if mealsCount == 2 {
-		for i := 0; i < daysCount; i++ {
+	} else if menu.Meals == 2 {
+		for i := 0; i < menu.Days; i++ {
 			day := Day{}
 			day.Count = i + 1
 			day.Recipes = append(day.Recipes, returnRand(breakfast))
@@ -93,6 +101,7 @@ func getMenu(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	render.JSON(w, r, days)
+	return
 }
 
 func getRecipes(cat int, calories int) ([]Recipe, error) {
@@ -140,4 +149,17 @@ func returnRand(recipes []Recipe) Recipe {
 	n := rand.Intn(len(recipes))
 	log.Println(len(recipes))
 	return recipes[n]
+}
+
+func checkIfValid(menu Menu) bool {
+	if menu.Days == 0 {
+		return false
+	}
+	if menu.Meals == 0 {
+		return false
+	}
+	if menu.Calories == 0 {
+		return false
+	}
+	return true
 }
