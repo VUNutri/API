@@ -28,6 +28,12 @@ func Routes() *chi.Mux {
 func createProduct(w http.ResponseWriter, r *http.Request) {
 	var product Product
 	json.NewDecoder(r.Body).Decode(&product)
+
+	if !checkIfValid(product) {
+		http.Error(w, "Bad request", 400)
+		return
+	}
+
 	db := db.InitDB()
 
 	query, err := db.Prepare("INSERT INTO products(title, calories, carbs, proteins) VALUES(?,?,?,?)")
@@ -87,4 +93,20 @@ func getProductByID(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	render.JSON(w, r, product)
+}
+
+func checkIfValid(p Product) bool {
+	if len(p.Title) < 4 {
+		return false
+	}
+	if p.Calories == 0 {
+		return false
+	}
+	if p.Carbs == 0 {
+		return false
+	}
+	if p.Proteins == 0 {
+		return false
+	}
+	return true
 }

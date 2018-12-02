@@ -207,7 +207,6 @@ func sumRecipeNutrition(recipe *Recipe) (err error) {
 }
 
 func createRecipeIngredients(recipe *Recipe) (err error) {
-
 	db := db.InitDB()
 	for _, product := range recipe.Products {
 		query, err := db.Prepare("INSERT INTO ingredients(recipeid, productid, value) VALUES(?,?,?)")

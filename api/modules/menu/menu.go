@@ -3,10 +3,11 @@ package menu
 import (
 	"app/modules/db"
 	"encoding/json"
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
-	"sort"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -19,10 +20,11 @@ type Day struct {
 }
 
 type Menu struct {
-	Days     int   `json:"days"`
-	Meals    int   `json:"meals"`
-	Calories int   `json:"calories"`
-	Block    []int `json:"blockedIngredients"`
+	Days     int      `json:"days"`
+	Meals    int      `json:"meals"`
+	Calories int      `json:"calories"`
+	Time     int      `json:"time"`
+	Block    []string `json:"blockedIngredients"`
 }
 
 type Product struct {
@@ -70,13 +72,19 @@ func getMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	breakfast, err := getRecipes(0, menu.Calories/4)
+	breakfast, err := getRecipes(menu.Block, 1, menu.Calories/4, menu.Time)
 	if err != nil {
 		http.Error(w, "Bad request", 400)
 		return
 	}
 
-	mainMeal, err := getRecipes(1, menu.Calories/2)
+	mainMeal, err := getRecipes(menu.Block, 2, menu.Calories/2, menu.Time)
+	if err != nil {
+		http.Error(w, "Bad request", 400)
+		return
+	}
+
+	snacks, err := getRecipes(menu.Block, 3, menu.Calories/2, menu.Time)
 	if err != nil {
 		http.Error(w, "Bad request", 400)
 		return
@@ -85,6 +93,10 @@ func getMenu(w http.ResponseWriter, r *http.Request) {
 	days := []Day{}
 
 	if menu.Meals == 1 {
+		if len(mainMeal) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		}
 		for i := 0; i < menu.Days; i++ {
 			day := Day{}
 			day.Count = i + 1
@@ -92,6 +104,13 @@ func getMenu(w http.ResponseWriter, r *http.Request) {
 			days = append(days, day)
 		}
 	} else if menu.Meals == 2 {
+		if len(mainMeal) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		} else if len(breakfast) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		}
 		for i := 0; i < menu.Days; i++ {
 			day := Day{}
 			day.Count = i + 1
@@ -99,15 +118,63 @@ func getMenu(w http.ResponseWriter, r *http.Request) {
 			day.Recipes = append(day.Recipes, returnRand(mainMeal))
 			days = append(days, day)
 		}
+	} else if menu.Meals == 3 {
+		if len(mainMeal) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		} else if len(breakfast) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		}
+		for i := 0; i < menu.Days; i++ {
+			day := Day{}
+			day.Count = i + 1
+			day.Recipes = append(day.Recipes, returnRand(breakfast))
+			day.Recipes = append(day.Recipes, returnRand(mainMeal))
+			day.Recipes = append(day.Recipes, returnRand(mainMeal))
+			days = append(days, day)
+		}
+	} else if menu.Meals > 3 {
+		if len(mainMeal) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		} else if len(breakfast) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		} else if len(snacks) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		}
+		for i := 0; i < menu.Days; i++ {
+			day := Day{}
+			day.Count = i + 1
+			day.Recipes = append(day.Recipes, returnRand(breakfast))
+			day.Recipes = append(day.Recipes, returnRand(mainMeal))
+			day.Recipes = append(day.Recipes, returnRand(mainMeal))
+			for i := 0; i < menu.Meals-3; i++ {
+				day.Recipes = append(day.Recipes, returnRand(snacks))
+			}
+			days = append(days, day)
+		}
+
 	}
 	render.JSON(w, r, days)
 	return
 }
 
-func getRecipes(cat int, calories int) ([]Recipe, error) {
+func getRecipes(products []string, cat int, calories int, time int) ([]Recipe, error) {
 	db := db.InitDB()
-	result, err := db.Query("SELECT * FROM recipes WHERE category = ? AND calories <= ?", cat, calories)
+
+	ids := strings.Join(products, "','")
+	if len(ids) < 1 {
+		ids = "0"
+	}
+
+	quer := fmt.Sprintf("SELECT A.id, A.title, A.category, A.time, A.image, A.instructions, A.calories, A.carbs, A.proteins FROM recipes A INNER JOIN (SELECT recipeId FROM ingredients GROUP BY recipeId HAVING SUM(CASE WHEN productId IN (%s) THEN 1 ELSE 0 END) = 0) B ON A.id = B.recipeId AND A.category = %d AND A.calories <= %d AND A.time <= %d", ids, cat, calories, time)
+
+	result, err := db.Query(quer)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -137,17 +204,12 @@ func getRecipes(cat int, calories int) ([]Recipe, error) {
 	}
 	defer db.Close()
 
-	sort.SliceStable(recipes, func(i, j int) bool {
-		return recipes[i].Calories < recipes[j].Calories
-	})
-
 	return recipes, nil
 }
 
 func returnRand(recipes []Recipe) Recipe {
 	rand.Seed(time.Now().UnixNano())
 	n := rand.Intn(len(recipes))
-	log.Println(len(recipes))
 	return recipes[n]
 }
 
