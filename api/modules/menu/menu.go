@@ -31,6 +31,7 @@ type Product struct {
 	ID       int    `json:"id"`
 	Title    string `json:"title"`
 	Value    int    `json:"value"`
+	Size     string 	`json:"size"`
 	Calories int    `json:"calories"`
 	Carbs    int    `json:"carbs"`
 	Proteins int    `json:"proteins"`
@@ -189,14 +190,15 @@ func getRecipes(products []string, cat int, calories int, time int) ([]Recipe, e
 	}
 
 	for idx, recipe := range recipes {
-		result, er := db.Query("SELECT products.id, products.title, ingredients.value, products.calories, products.proteins, products.carbs FROM ingredients LEFT JOIN products ON ingredients.productId = products.id WHERE ingredients.recipeId = ?", recipe.ID)
+		result, er := db.Query("SELECT products.id, products.title, ingredients.value, products.calories, products.proteins, products.carbs, products.size FROM ingredients LEFT JOIN products ON ingredients.productId = products.id WHERE ingredients.recipeId = ?", recipe.ID)
 		if er != nil {
 			return nil, err
 		}
 		for result.Next() {
 			var product Product
-			err := result.Scan(&product.ID, &product.Title, &product.Value, &product.Calories, &product.Proteins, &product.Carbs)
+			err := result.Scan(&product.ID, &product.Title, &product.Value, &product.Calories, &product.Proteins, &product.Carbs, &product.Size)
 			if err != nil {
+				log.Println(err)
 				return nil, err
 			}
 			recipes[idx].Products = append(recipes[idx].Products, product)

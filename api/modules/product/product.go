@@ -13,6 +13,7 @@ import (
 type Product struct {
 	ID       int    `json:"id"`
 	Title    string `json:"title"`
+	Size     string `json:"size"`
 	Calories int    `json:"calories"`
 	Carbs    int    `json:"carbs"`
 	Proteins int    `json:"proteins"`
@@ -43,13 +44,13 @@ func createProduct(w http.ResponseWriter, r *http.Request) {
 
 	db := db.InitDB()
 
-	query, err := db.Prepare("INSERT INTO products(title, calories, carbs, proteins) VALUES(?,?,?,?)")
+	query, err := db.Prepare("INSERT INTO products(title, calories, carbs, proteins, size) VALUES(?,?,?,?,?)")
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
 
-	_, er := query.Exec(product.Title, product.Calories, product.Carbs, product.Proteins)
+	_, er := query.Exec(product.Title, product.Calories, product.Carbs, product.Proteins, product.Size)
 	defer db.Close()
 	if er != nil {
 		http.Error(w, err.Error(), 400)
@@ -71,7 +72,7 @@ func getAllProducts(w http.ResponseWriter, r *http.Request) {
 	products := []Product{}
 	for result.Next() {
 		var product Product
-		err := result.Scan(&product.ID, &product.Title, &product.Calories, &product.Carbs, &product.Proteins)
+		err := result.Scan(&product.ID, &product.Title, &product.Calories, &product.Carbs, &product.Proteins, &product.Size)
 		if err != nil {
 			http.Error(w, err.Error(), 400)
 			return
@@ -93,7 +94,7 @@ func getProductByID(w http.ResponseWriter, r *http.Request) {
 
 	product := Product{}
 	for result.Next() {
-		err := result.Scan(&product.ID, &product.Title, &product.Calories, &product.Carbs, &product.Proteins)
+		err := result.Scan(&product.ID, &product.Title, &product.Calories, &product.Carbs, &product.Proteins, &product.Size)
 		if err != nil {
 			http.Error(w, err.Error(), 400)
 			return
@@ -104,6 +105,9 @@ func getProductByID(w http.ResponseWriter, r *http.Request) {
 
 func checkIfValid(p Product) bool {
 	if len(p.Title) < 4 {
+		return false
+	}
+	if len(p.Size) < 1 {
 		return false
 	}
 	if p.Calories == 0 {

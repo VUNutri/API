@@ -19,6 +19,7 @@ type Product struct {
 	ID       int    `json:"id"`
 	Title    string `json:"title"`
 	Value    int    `json:"value"`
+	Size     string `json:"size"`
 	Calories int    `json:"calories"`
 	Carbs    int    `json:"carbs"`
 	Proteins int    `json:"proteins"`
@@ -129,14 +130,14 @@ func getAllRecipes(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for idx, recipe := range recipes {
-		result, er := db.Query("SELECT products.id, products.title, ingredients.value, products.calories, products.proteins, products.carbs FROM ingredients LEFT JOIN products ON ingredients.productId = products.id WHERE ingredients.recipeId = ?", recipe.ID)
+		result, er := db.Query("SELECT products.id, products.title, ingredients.value, products.calories, products.proteins, products.carbs, products.size FROM ingredients LEFT JOIN products ON ingredients.productId = products.id WHERE ingredients.recipeId = ?", recipe.ID)
 		if er != nil {
 			http.Error(w, err.Error(), 400)
 			return
 		}
 		for result.Next() {
 			var product Product
-			err := result.Scan(&product.ID, &product.Title, &product.Value, &product.Calories, &product.Proteins, &product.Carbs)
+			err := result.Scan(&product.ID, &product.Title, &product.Value, &product.Calories, &product.Proteins, &product.Carbs, &product.Size)
 			if err != nil {
 				http.Error(w, err.Error(), 400)
 				return
@@ -166,14 +167,14 @@ func getRecipeById(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	result, err = db.Query("SELECT products.id, products.title, ingredients.value, products.calories, products.proteins, products.carbs FROM ingredients LEFT JOIN products ON ingredients.productId = products.id WHERE ingredients.recipeId = ?", recipe.ID)
+	result, err = db.Query("SELECT products.id, products.title, ingredients.value, products.calories, products.proteins, products.carbs, products.size FROM ingredients LEFT JOIN products ON ingredients.productId = products.id WHERE ingredients.recipeId = ?", recipe.ID)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
 	for result.Next() {
 		var product Product
-		err := result.Scan(&product.ID, &product.Title, &product.Value, &product.Calories, &product.Proteins, &product.Carbs)
+		err := result.Scan(&product.ID, &product.Title, &product.Value, &product.Calories, &product.Proteins, &product.Carbs, &product.Size)
 		if err != nil {
 			http.Error(w, err.Error(), 400)
 			return
@@ -195,12 +196,12 @@ func updateRecipeNutrition(recipe *Recipe) (err error) {
 
 func sumRecipeNutrition(recipe *Recipe) (err error) {
 	db := db.InitDB()
-	result, err := db.Query("SELECT products.title, ingredients.value, products.calories, products.proteins, products.carbs FROM ingredients LEFT JOIN products ON ingredients.productId = products.id WHERE ingredients.recipeId = ?", recipe.ID)
+	result, err := db.Query("SELECT products.title, ingredients.value, products.calories, products.proteins, products.carbs, products.size FROM ingredients LEFT JOIN products ON ingredients.productId = products.id WHERE ingredients.recipeId = ?", recipe.ID)
 	defer db.Close()
 	if err == nil {
 		for result.Next() {
 			var product Product
-			err := result.Scan(&product.Title, &product.Value, &product.Calories, &product.Proteins, &product.Carbs)
+			err := result.Scan(&product.Title, &product.Value, &product.Calories, &product.Proteins, &product.Carbs, &product.Size)
 			if err != nil {
 				return err
 			}

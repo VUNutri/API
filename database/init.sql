@@ -7,6 +7,7 @@ Create TABLE products (
   calories int(6) NOT NULL,
   carbs int (6) NOT NULL ,
   proteins int(6) NOT NULL,
+  size varchar (10) NOT NULL,
   primary key (id)
 );
 

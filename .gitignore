@@ -2,3 +2,4 @@ api/tmp/
 db_data
 .vscode
 .env
+.idea
