@@ -1,14 +1,14 @@
 # Nutri APP API
 
 ### Introduction
-This api is based on REST architecture. The whole communication process is being made with HTTP JSON request and responses. 
+This api is based on REST architecture. The whole communication process is being made with HTTP JSON request and responses.
  ___
 
 ### Product
 
 **Product creation**
 POST request url: `<host>/v1/api/products/create`
-JSON Request: 
+JSON Request:
 ```
 {
   "title": string,
@@ -127,7 +127,7 @@ Title is valid/not valid
 ### Menu
 **Fetching menu**
 POST request url: `<host>/v1/api/menu/getMenu`
-JSON Request: 
+JSON Request:
 ```
 {
   "days": int,
@@ -165,4 +165,24 @@ JSON Response:
   }
 ]
 ```
-
+### Auth
+**Admin creation**
+POST request url: `<host>/v1/api/auth/create`
+JSON Response:
+```
+{
+  "username": string,
+  "pass": string //hash instead of cleartext password
+}
+```
+**Admin login**
+POST request url: `<host>/v1/api/auth/login`
+JSON Response:
+```
+{
+  "username": string,
+  "pass": string //hash instead of cleartext password
+}
+```
+**Cookies**
+TTL of cookies is 15 minutes

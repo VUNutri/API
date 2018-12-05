@@ -1,6 +1,7 @@
 package main
 
 import (
+	"app/modules/auth"
 	"app/modules/menu"
 	"app/modules/product"
 	"app/modules/recipe"
@@ -26,6 +27,7 @@ func routes() *chi.Mux {
 		r.Mount("/api/products", product.Routes())
 		r.Mount("/api/recipes", recipe.Routes())
 		r.Mount("/api/menu", menu.Routes())
+		r.Mount("/api/auth", auth.Routes())
 	})
 
 	return router
@@ -33,7 +35,6 @@ func routes() *chi.Mux {
 
 func main() {
 	router := routes()
-
 	err := http.ListenAndServe(":8080", router)
 	if err != nil {
 		log.Println(err)

@@ -36,3 +36,11 @@ CREATE TABLE ingredients (
   foreign key (recipeId) references recipes(id),
   foreign key (productId) references products(id)
 );
+
+DROP TABLE IF EXISTS admins;
+Create TABLE admins (
+  id int(6) unsigned NOT NULL AUTO_INCREMENT,
+  name varchar(30) UNIQUE NOT NULL,
+  pass varchar(64) NOT NULL,
+  primary key (id)
+);

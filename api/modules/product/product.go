@@ -1,6 +1,7 @@
 package product
 
 import (
+	"app/modules/auth"
 	"app/modules/db"
 	"encoding/json"
 	"net/http"
@@ -26,6 +27,12 @@ func Routes() *chi.Mux {
 }
 
 func createProduct(w http.ResponseWriter, r *http.Request) {
+	session, _ := auth.Store.Get(r, "cookie")
+	if auth, ok := session.Values["auth"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
 	var product Product
 	json.NewDecoder(r.Body).Decode(&product)
 
