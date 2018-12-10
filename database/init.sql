@@ -3,7 +3,7 @@ USE nutri;
 DROP TABLE IF EXISTS products;
 Create TABLE products (
   id int(6) unsigned NOT NULL AUTO_INCREMENT,
-  title varchar(30) UNIQUE NOT NULL,
+  title varchar(60) UNIQUE NOT NULL,
   calories int(6) NOT NULL,
   carbs int (6) NOT NULL ,
   proteins int(6) NOT NULL,
@@ -14,10 +14,10 @@ Create TABLE products (
 DROP TABLE IF EXISTS recipes;
 CREATE TABLE recipes (
   id int(6) unsigned NOT NULL AUTO_INCREMENT,
-  title varchar(30) UNIQUE NOT NULL,
+  title varchar(100) UNIQUE NOT NULL,
   category int(1) NOT NULL,
   time int(15) NOT NULL,
-  image varchar(50) NOT NULL,
+  image varchar(300) NOT NULL,
   instructions text NOT NULL,
   calories int(6) DEFAULT 0,
   carbs int (6) DEFAULT 0 ,

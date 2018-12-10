@@ -3,6 +3,7 @@ package recipe
 import (
 	"app/modules/db"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -39,9 +40,9 @@ type Recipe struct {
 
 type Ingredients struct {
 	ID        int
-	RecipeID  int `json:"recipeId"`
-	ProductID int `json:"productId"`
-	Value     int `json:"value"`
+	RecipeID  int     `json:"recipeId"`
+	ProductID int     `json:"productId"`
+	Value     float64 `json:"value"`
 }
 
 func Routes() *chi.Mux {
@@ -73,18 +74,21 @@ func createRecipe(w http.ResponseWriter, r *http.Request) {
 	query, err := db.Prepare("INSERT INTO recipes(title, category, time, image, instructions) VALUES(?,?,?,?,?)")
 	if err != nil {
 		http.Error(w, "SQL insert error", 400)
+		log.Print(err)
 		return
 	}
 
 	res, err := query.Exec(recipe.Title, recipe.Category, recipe.Time, recipe.Image, recipe.Instructions)
 	if err != nil {
 		http.Error(w, "SQL insert error", 400)
+		log.Print(err)
 		return
 	}
 
 	recipeID, err := res.LastInsertId()
 	if err != nil {
 		http.Error(w, "SQL insert error", 400)
+		log.Print(err)
 		return
 	}
 	recipe.ID = int(recipeID)
