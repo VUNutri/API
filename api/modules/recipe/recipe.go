@@ -16,13 +16,13 @@ type Day struct {
 }
 
 type Product struct {
-	ID       int    `json:"id"`
-	Title    string `json:"title"`
-	Value    int    `json:"value"`
-	Size     string `json:"size"`
-	Calories int    `json:"calories"`
-	Carbs    int    `json:"carbs"`
-	Proteins int    `json:"proteins"`
+	ID       int     `json:"id"`
+	Title    string  `json:"title"`
+	Value    float64 `json:"value"`
+	Size     string  `json:"size"`
+	Calories int     `json:"calories"`
+	Carbs    int     `json:"carbs"`
+	Proteins int     `json:"proteins"`
 }
 
 type Recipe struct {

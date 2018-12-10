@@ -30,7 +30,7 @@ CREATE TABLE ingredients (
   id int(6) unsigned NOT NULL AUTO_INCREMENT,
   recipeId int(6) unsigned NOT NULL,
   productId int(6) unsigned NOT NULL,
-  value decimal(6),
+  value decimal(6, 4),
   index (recipeId),
   index (productId),
   primary key (id),
