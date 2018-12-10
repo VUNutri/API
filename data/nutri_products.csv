@@ -1,13 +1,13 @@
-1,pienas,42,5,4
-2,kiaušiniai,155,2,13
-3,miltai,364,76,10
-4,cukrus,368,100,0
-5,avižiniai dribsniai,67,12,3
-6,vanduo,0,0,0
-7,bananai,88,23,2
-8,manų kruopos,360,74,10
-9,sviestas,716,1,1
-10,cukinija,16,3,1
-11,bulvės,85,18,2
-12,pomidorai,22,4,1
-13,sūris,402,2,25
+1,pienas,42,5,4,ml
+2,kiaušiniai,155,2,13,vnt
+3,miltai,364,76,10,g
+4,cukrus,368,100,0,g
+5,avižiniai dribsniai,67,12,3,g
+6,vanduo,0,0,0,ml
+7,bananai,88,23,2,g
+8,manų kruopos,360,74,10,g
+9,sviestas,716,1,1,g
+10,cukinija,16,3,1,g
+11,bulvės,85,18,2,g
+12,pomidorai,22,4,1,g
+13,sūris,402,2,25,g
