@@ -76,21 +76,18 @@ func getMenu(w http.ResponseWriter, r *http.Request) {
 	breakfast, err := getRecipes(menu.Block, 1, menu.Calories/4, menu.Time)
 	if err != nil {
 		http.Error(w, "Bad request", 400)
-		log.Print(err)
 		return
 	}
 
 	mainMeal, err := getRecipes(menu.Block, 2, menu.Calories/2, menu.Time)
 	if err != nil {
 		http.Error(w, "Bad request", 400)
-		log.Print(err)
 		return
 	}
 
-	snacks, err := getRecipes(menu.Block, 2, menu.Calories/2, menu.Time)
+	snacks, err := getRecipes(menu.Block, 3, menu.Calories/2, menu.Time)
 	if err != nil {
 		http.Error(w, "Bad request", 400)
-		log.Print(err)
 		return
 	}
 
