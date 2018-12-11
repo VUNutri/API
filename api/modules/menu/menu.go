@@ -28,13 +28,13 @@ type Menu struct {
 }
 
 type Product struct {
-	ID       int    `json:"id"`
-	Title    string `json:"title"`
-	Value    int    `json:"value"`
-	Size     string `json:"size"`
-	Calories int    `json:"calories"`
-	Carbs    int    `json:"carbs"`
-	Proteins int    `json:"proteins"`
+	ID       int     `json:"id"`
+	Title    string  `json:"title"`
+	Value    float64 `json:"value"`
+	Size     string  `json:"size"`
+	Calories int     `json:"calories"`
+	Carbs    int     `json:"carbs"`
+	Proteins int     `json:"proteins"`
 }
 
 type Recipe struct {
@@ -52,9 +52,9 @@ type Recipe struct {
 
 type Ingredients struct {
 	ID        int
-	RecipeID  int `json:"recipeId"`
-	ProductID int `json:"productId"`
-	Value     int `json:"value"`
+	RecipeID  int     `json:"recipeId"`
+	ProductID int     `json:"productId"`
+	Value     float64 `json:"value"`
 }
 
 func Routes() *chi.Mux {
