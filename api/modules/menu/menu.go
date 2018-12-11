@@ -70,7 +70,6 @@ func getMenu(w http.ResponseWriter, r *http.Request) {
 
 	if !checkIfValid(menu) {
 		http.Error(w, "Bad request", 400)
-		log.Print(err)
 		return
 	}
 
