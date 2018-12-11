@@ -69,7 +69,7 @@ func getMenu(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&menu)
 
 	if !checkIfValid(menu) {
-		http.Error(w, "Bad request", 400)
+		http.Error(w, "Ivalid request", 400)
 		return
 	}
 
