@@ -31,7 +31,7 @@ type Product struct {
 	ID       int    `json:"id"`
 	Title    string `json:"title"`
 	Value    int    `json:"value"`
-	Size     string 	`json:"size"`
+	Size     string `json:"size"`
 	Calories int    `json:"calories"`
 	Carbs    int    `json:"carbs"`
 	Proteins int    `json:"proteins"`
@@ -69,25 +69,25 @@ func getMenu(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&menu)
 
 	if !checkIfValid(menu) {
-		http.Error(w, "Bad request", 400)
+		http.Error(w, err, 400)
 		return
 	}
 
 	breakfast, err := getRecipes(menu.Block, 1, menu.Calories/4, menu.Time)
 	if err != nil {
-		http.Error(w, "Bad request", 400)
+		http.Error(w, err, 400)
 		return
 	}
 
 	mainMeal, err := getRecipes(menu.Block, 2, menu.Calories/2, menu.Time)
 	if err != nil {
-		http.Error(w, "Bad request", 400)
+		http.Error(w, err, 400)
 		return
 	}
 
 	snacks, err := getRecipes(menu.Block, 3, menu.Calories/2, menu.Time)
 	if err != nil {
-		http.Error(w, "Bad request", 400)
+		http.Error(w, err, 400)
 		return
 	}
 
