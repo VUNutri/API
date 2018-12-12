@@ -26,7 +26,7 @@ func routes() *chi.Mux {
 
 	router := chi.NewRouter()
 	router.Use(
-		cors.Handler
+		cors.Handler,
 		render.SetContentType(render.ContentTypeJSON),
 		middleware.Logger,
 		middleware.DefaultCompress,
