@@ -19,6 +19,21 @@ type Day struct {
 	Recipes []Recipe `json:"meals"`
 }
 
+type DayMenu struct {
+	Meals    int      `json:"meals"`
+	Calories int      `json:"calories"`
+	Time     int      `json:"time"`
+	Block    []string `json:"blockedIngredients"`
+	Count    int      `json:"dayCount"`
+}
+
+type SingleMenu struct {
+	Category int      `json:"category"`
+	Calories int      `json:"calories"`
+	Time     int      `json:"time"`
+	Block    []string `json:"blockedIngredients"`
+}
+
 type Menu struct {
 	Days     int      `json:"days"`
 	Meals    int      `json:"meals"`
@@ -60,6 +75,8 @@ type Ingredients struct {
 func Routes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Post("/getMenu", getMenu)
+	router.Post("/getDailyMenu", getDailyMenu)
+	router.Post("/getDayOneMenu", getOneDayMenu)
 	return router
 }
 
@@ -163,6 +180,121 @@ func getMenu(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+func getDailyMenu(w http.ResponseWriter, r *http.Request) {
+	var menu DayMenu
+	json.NewDecoder(r.Body).Decode(&menu)
+
+	if !checkIfValidDMenu(menu) {
+		http.Error(w, "Ivalid requests", 400)
+		return
+	}
+
+	breakfast, err := getRecipes(menu.Block, 1, menu.Calories/4, menu.Time)
+	if err != nil {
+		http.Error(w, "Bad request", 400)
+		return
+	}
+
+	mainMeal, err := getRecipes(menu.Block, 2, menu.Calories/2, menu.Time)
+	if err != nil {
+		http.Error(w, "Bad request", 400)
+		return
+	}
+
+	snacks, err := getRecipes(menu.Block, 3, menu.Calories/2, menu.Time)
+	if err != nil {
+		http.Error(w, "Bad request", 400)
+		return
+	}
+
+	day := Day{}
+	day.Count = menu.Count
+
+	if menu.Meals == 1 {
+		if len(mainMeal) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		}
+		day.Recipes = append(day.Recipes, returnRand(mainMeal))
+	} else if menu.Meals == 2 {
+		if len(mainMeal) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		} else if len(breakfast) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		}
+		day.Recipes = append(day.Recipes, returnRand(breakfast))
+		day.Recipes = append(day.Recipes, returnRand(mainMeal))
+	} else if menu.Meals == 3 {
+		if len(mainMeal) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		} else if len(breakfast) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		}
+		day.Recipes = append(day.Recipes, returnRand(breakfast))
+		day.Recipes = append(day.Recipes, returnRand(mainMeal))
+		day.Recipes = append(day.Recipes, returnRand(mainMeal))
+	} else if menu.Meals > 3 {
+		if len(mainMeal) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		} else if len(breakfast) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		} else if len(snacks) < 1 {
+			http.Error(w, "Bad requirements", 400)
+			return
+		}
+		day.Recipes = append(day.Recipes, returnRand(breakfast))
+		day.Recipes = append(day.Recipes, returnRand(mainMeal))
+		day.Recipes = append(day.Recipes, returnRand(mainMeal))
+		for i := 0; i < menu.Meals-3; i++ {
+			day.Recipes = append(day.Recipes, returnRand(snacks))
+		}
+	}
+	render.JSON(w, r, day)
+	return
+}
+
+func getOneDayMenu(w http.ResponseWriter, r *http.Request) {
+	var menu SingleMenu
+	json.NewDecoder(r.Body).Decode(&menu)
+
+	if !checkIfValidDOneMenu(menu) {
+		http.Error(w, "Ivalid requests", 400)
+		return
+	}
+
+	if menu.Category == 1 {
+		breakfast, err := getRecipes(menu.Block, 1, menu.Calories/4, menu.Time)
+		if err != nil {
+			http.Error(w, "Bad request", 400)
+			return
+		}
+		render.JSON(w, r, returnRand(breakfast))
+	} else if menu.Category == 2 {
+		mainMeal, err := getRecipes(menu.Block, 2, menu.Calories/2, menu.Time)
+		if err != nil {
+			http.Error(w, "Bad request", 400)
+			return
+		}
+		render.JSON(w, r, returnRand(mainMeal))
+	} else if menu.Category == 3 {
+		snacks, err := getRecipes(menu.Block, 3, menu.Calories/2, menu.Time)
+		if err != nil {
+			http.Error(w, "Bad request", 400)
+			return
+		}
+		render.JSON(w, r, returnRand(snacks))
+	}
+
+	http.Error(w, "Bad request", 400)
+	return
+}
+
 func getRecipes(products []string, cat int, calories int, time int) ([]Recipe, error) {
 	db := db.InitDB()
 
@@ -223,6 +355,38 @@ func checkIfValid(menu Menu) bool {
 		return false
 	}
 	if menu.Calories == 0 {
+		return false
+	}
+	if menu.Time == 0 {
+		return false
+	}
+	return true
+}
+
+func checkIfValidDMenu(menu DayMenu) bool {
+	if menu.Meals == 0 {
+		return false
+	}
+	if menu.Calories == 0 {
+		return false
+	}
+	if menu.Time == 0 {
+		return false
+	}
+	if menu.Count == 0 {
+		return false
+	}
+	return true
+}
+
+func checkIfValidDOneMenu(menu SingleMenu) bool {
+	if menu.Calories == 0 {
+		return false
+	}
+	if menu.Time == 0 {
+		return false
+	}
+	if menu.Category == 0 {
 		return false
 	}
 	return true

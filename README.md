@@ -132,6 +132,7 @@ JSON Request:
 {
   "days": int,
   "meals": int,
+  "time": int,
   "calories": int,
   "blockedIngredients": int []
 }
@@ -164,6 +165,80 @@ JSON Response:
     ]
   }
 ]
+```
+**Fetching one day menu**
+POST request url: `<host>/v1/api/menu/getDailyMenu`
+JSON Request:
+```
+{
+  "dayCount": int,
+  "meals": int,
+  "calories": int,
+  "time": int,
+  "blockedIngredients": int []
+}
+```
+JSON Response:
+```
+{
+  "dayCount": int,
+  "meals": [
+    "id": int,
+    "title": string,
+    "category": int,
+    "time": int,
+    "image": string,
+    "instructions": string,
+    "calories": int,
+    "carbs": int,
+    "proteins": int
+    "products": [
+      {
+        "id": int,
+        "title": string,
+        "value": int,
+        "calories": int,
+        "carbs": int,
+        "proteins": int
+      }
+    ]
+  ]
+}
+```
+**Fetching single day menu**
+POST request url: `<host>/v1/api/menu/getDayOneMenu`
+JSON Request:
+```
+{
+  "category": int,
+  "calories": int,
+  "time": int,
+  "blockedIngredients": int []
+}
+```
+JSON Response:
+```
+{
+  "id": int,
+  "title": string,
+  "category": int,
+  "time": int,
+  "image": string,
+  "instructions": string,
+  "calories": int,
+  "carbs": int,
+  "proteins": int
+  "products": [
+    {
+      "id": int,
+      "title": string,
+      "value": int,
+      "calories": int,
+      "carbs": int,
+      "proteins": int
+    }
+  ]
+}
 ```
 ### Auth
 **Admin creation**
