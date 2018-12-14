@@ -275,6 +275,7 @@ func getOneDayMenu(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		render.JSON(w, r, returnRand(breakfast))
+		return
 	} else if menu.Category == 2 {
 		mainMeal, err := getRecipes(menu.Block, 2, menu.Calories/2, menu.Time)
 		if err != nil {
@@ -282,6 +283,7 @@ func getOneDayMenu(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		render.JSON(w, r, returnRand(mainMeal))
+		return
 	} else if menu.Category == 3 {
 		snacks, err := getRecipes(menu.Block, 3, menu.Calories/2, menu.Time)
 		if err != nil {
@@ -289,6 +291,7 @@ func getOneDayMenu(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		render.JSON(w, r, returnRand(snacks))
+		return
 	}
 
 	http.Error(w, "Bad request", 400)
