@@ -1,7 +1,8 @@
 # Nutri APP API
 
 ### Introduction
-This api is based on REST architecture. The whole communication process is being made with HTTP JSON request and responses.
+This api is based on REST architecture. The whole communication process is being made with HTTP JSON request and responses. To try this api locally, all you need to is to install [docker-compose](https://docs.docker.com/compose/), create .env file and run:  
+```docker-compose up -d --build```
  ___
 
 ### Product
